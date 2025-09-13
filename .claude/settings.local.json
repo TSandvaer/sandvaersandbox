@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.sandvaer.dk)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "WebFetch(domain:sandvaer.dk)",
+      "Read(//c/trunk/sandvaer/**)"
     ],
     "deny": [],
     "ask": []
