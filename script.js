@@ -87,6 +87,26 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 
+    // View Code button functionality
+    const viewCodeButtons = document.querySelectorAll('.btn-secondary');
+    viewCodeButtons.forEach(button => {
+        if (button.textContent === 'View Code') {
+            button.addEventListener('click', function() {
+                const projectCard = this.closest('.project-card');
+                const projectTitle = projectCard.querySelector('h3').textContent;
+
+                // Handle different projects
+                if (projectTitle === 'Flaming Pong') {
+                    // Open the source code viewer in a new window
+                    window.open('games/flaming-pong/view-source.html', '_blank');
+                } else {
+                    // For other projects, show a coming soon message
+                    alert(`Source code for ${projectTitle} will be available soon!`);
+                }
+            });
+        }
+    });
+
     // Mobile menu toggle (if needed in future)
     const mobileMenuToggle = () => {
         // Future implementation for mobile menu
