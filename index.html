@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox Projects - Interactive Showcase</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="https://www.sandvaer.dk" class="nav-logo">← Back to CV</a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#projects" class="nav-link">Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#categories" class="nav-link">Categories</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Sandbox Projects</h1>
+            <p>Interactive experiments and creative coding projects</p>
+            <div class="hero-glow"></div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="categories" class="categories-section">
+            <h2>Project Categories</h2>
+            <div class="category-filters">
+                <button class="filter-btn active" data-category="all">All Projects</button>
+                <button class="filter-btn" data-category="games">Games</button>
+                <button class="filter-btn" data-category="productivity">Productivity</button>
+                <button class="filter-btn" data-category="entertainment">Entertainment</button>
+            </div>
+        </section>
+
+        <section id="projects" class="projects-section">
+            <div class="projects-grid">
+                <div class="project-card" data-category="games">
+                    <div class="project-image">
+                        <div class="project-placeholder">🎮</div>
+                    </div>
+                    <div class="project-info">
+                        <h3>Flaming Pong</h3>
+                        <p>Classic Pong game with fiery visual effects and modern gameplay mechanics.</p>
+                        <div class="project-tags">
+                            <span class="tag">JavaScript</span>
+                            <span class="tag">Canvas</span>
+                            <span class="tag">Game</span>
+                        </div>
+                        <div class="project-actions">
+                            <a href="./games/flaming-pong/" class="btn-primary" target="_blank">Play Game</a>
+                            <button class="btn-secondary">View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" data-category="productivity">
+                    <div class="project-image">
+                        <div class="project-placeholder">📊</div>
+                    </div>
+                    <div class="project-info">
+                        <h3>Task Manager</h3>
+                        <p>Minimalist task management application with local storage.</p>
+                        <div class="project-tags">
+                            <span class="tag">React</span>
+                            <span class="tag">LocalStorage</span>
+                            <span class="tag">Productivity</span>
+                        </div>
+                        <div class="project-actions">
+                            <button class="btn-primary" disabled>Coming Soon</button>
+                            <button class="btn-secondary" disabled>View Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card" data-category="entertainment">
+                    <div class="project-image">
+                        <div class="project-placeholder">🎵</div>
+                    </div>
+                    <div class="project-info">
+                        <h3>Audio Visualizer</h3>
+                        <p>Real-time audio visualization with customizable effects and themes.</p>
+                        <div class="project-tags">
+                            <span class="tag">Web Audio API</span>
+                            <span class="tag">Canvas</span>
+                            <span class="tag">Music</span>
+                        </div>
+                        <div class="project-actions">
+                            <button class="btn-primary" disabled>Coming Soon</button>
+                            <button class="btn-secondary" disabled>View Code</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Sandbox Projects. Built with ❤️ for experimentation.</p>
+            <a href="https://www.sandvaer.dk">Visit Main Portfolio</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

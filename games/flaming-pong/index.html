@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        
+        .game-container {
+            text-align: center;
+        }
+        
+        canvas {
+            border: 2px solid #fff;
+            background-color: #000;
+        }
+        
+        .score {
+            color: #fff;
+            font-size: 48px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .controls {
+            color: #fff;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        
+        .game-over {
+            color: #fff;
+            font-size: 32px;
+            margin: 20px 0;
+        }
+        
+        .restart-btn {
+            background-color: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .restart-btn:hover {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="score">
+            <span id="player1Score">0</span> - <span id="player2Score">0</span>
+        </div>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div class="controls">
+            Player 1: W/S keys | Player 2: ↑/↓ keys
+        </div>
+        <div id="gameOver" class="game-over" style="display: none;">
+            Game Over!<br>
+            <button class="restart-btn" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const player1ScoreEl = document.getElementById('player1Score');
+        const player2ScoreEl = document.getElementById('player2Score');
+        const gameOverEl = document.getElementById('gameOver');
+
+        const PADDLE_WIDTH = 10;
+        const PADDLE_HEIGHT = 80;
+        const BALL_SIZE = 10;
+        const PADDLE_SPEED = 5;
+        const BALL_SPEED = 4;
+        const WINNING_SCORE = 5;
+
+        let gameRunning = true;
+        let gameStartTime = Date.now();
+        let ballSpeedMultiplier = 1;
+        let pulsePhase = 0;
+
+        let flameParticles = [];
+
+        const game = {
+            player1: {
+                x: 20,
+                y: canvas.height / 2 - PADDLE_HEIGHT / 2,
+                score: 0,
+                dy: 0
+            },
+            player2: {
+                x: canvas.width - 20 - PADDLE_WIDTH,
+                y: canvas.height / 2 - PADDLE_HEIGHT / 2,
+                score: 0,
+                dy: 0
+            },
+            ball: {
+                x: canvas.width / 2 - BALL_SIZE / 2,
+                y: canvas.height / 2 - BALL_SIZE / 2,
+                dx: BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
+                dy: BALL_SPEED * (Math.random() > 0.5 ? 1 : -1)
+            }
+        };
+
+        const keys = {
+            w: false,
+            s: false,
+            ArrowUp: false,
+            ArrowDown: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = true;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false;
+            }
+        });
+
+        function updatePaddles() {
+            if (keys.w && game.player1.y > 0) {
+                game.player1.y -= PADDLE_SPEED;
+            }
+            if (keys.s && game.player1.y < canvas.height - PADDLE_HEIGHT) {
+                game.player1.y += PADDLE_SPEED;
+            }
+            if (keys.ArrowUp && game.player2.y > 0) {
+                game.player2.y -= PADDLE_SPEED;
+            }
+            if (keys.ArrowDown && game.player2.y < canvas.height - PADDLE_HEIGHT) {
+                game.player2.y += PADDLE_SPEED;
+            }
+        }
+
+        function createFlameParticle(x, y) {
+            return {
+                x: x + Math.random() * BALL_SIZE,
+                y: y + Math.random() * BALL_SIZE,
+                size: Math.random() * 3 + 1,
+                life: 20 + Math.random() * 20,
+                maxLife: 40,
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2
+            };
+        }
+
+        function updateFlames() {
+            for (let i = 0; i < 3; i++) {
+                flameParticles.push(createFlameParticle(game.ball.x, game.ball.y));
+            }
+
+            for (let i = flameParticles.length - 1; i >= 0; i--) {
+                const particle = flameParticles[i];
+                particle.x += particle.dx;
+                particle.y += particle.dy;
+                particle.life--;
+                particle.size *= 0.98;
+
+                if (particle.life <= 0 || particle.size < 0.1) {
+                    flameParticles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawFlames() {
+            flameParticles.forEach(particle => {
+                const alpha = particle.life / particle.maxLife;
+                const size = particle.size;
+                
+                const gradient = ctx.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, size * 2
+                );
+                
+                if (alpha > 0.7) {
+                    gradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+                    gradient.addColorStop(0.3, `rgba(255, 255, 0, ${alpha})`);
+                    gradient.addColorStop(0.7, `rgba(255, 100, 0, ${alpha * 0.8})`);
+                    gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+                } else if (alpha > 0.4) {
+                    gradient.addColorStop(0, `rgba(255, 255, 0, ${alpha})`);
+                    gradient.addColorStop(0.5, `rgba(255, 100, 0, ${alpha})`);
+                    gradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+                } else {
+                    gradient.addColorStop(0, `rgba(255, 100, 0, ${alpha})`);
+                    gradient.addColorStop(0.7, `rgba(255, 0, 0, ${alpha * 0.7})`);
+                    gradient.addColorStop(1, `rgba(100, 0, 0, 0)`);
+                }
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function updateBall() {
+            const currentTime = Date.now();
+            const timeElapsed = (currentTime - gameStartTime) / 1000;
+            
+            if (timeElapsed >= 30) {
+                const timeAfter30 = timeElapsed - 30;
+                ballSpeedMultiplier = Math.min(1 + timeAfter30 * 0.02, 2);
+                pulsePhase += 0.2;
+            }
+            
+            game.ball.x += game.ball.dx * ballSpeedMultiplier;
+            game.ball.y += game.ball.dy * ballSpeedMultiplier;
+            
+            updateFlames();
+
+            if (game.ball.y <= 0 || game.ball.y >= canvas.height - BALL_SIZE) {
+                game.ball.dy = -game.ball.dy;
+            }
+
+            if (game.ball.x <= game.player1.x + PADDLE_WIDTH && 
+                game.ball.y + BALL_SIZE >= game.player1.y && 
+                game.ball.y <= game.player1.y + PADDLE_HEIGHT) {
+                game.ball.dx = -game.ball.dx;
+                game.ball.x = game.player1.x + PADDLE_WIDTH;
+            }
+
+            if (game.ball.x + BALL_SIZE >= game.player2.x && 
+                game.ball.y + BALL_SIZE >= game.player2.y && 
+                game.ball.y <= game.player2.y + PADDLE_HEIGHT) {
+                game.ball.dx = -game.ball.dx;
+                game.ball.x = game.player2.x - BALL_SIZE;
+            }
+
+            if (game.ball.x < 0) {
+                game.player2.score++;
+                resetBall();
+                updateScore();
+            }
+
+            if (game.ball.x > canvas.width) {
+                game.player1.score++;
+                resetBall();
+                updateScore();
+            }
+
+            if (game.player1.score >= WINNING_SCORE || game.player2.score >= WINNING_SCORE) {
+                gameRunning = false;
+                gameOverEl.style.display = 'block';
+            }
+        }
+
+        function resetBall() {
+            game.ball.x = canvas.width / 2 - BALL_SIZE / 2;
+            game.ball.y = canvas.height / 2 - BALL_SIZE / 2;
+            game.ball.dx = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
+            game.ball.dy = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
+            gameStartTime = Date.now();
+            ballSpeedMultiplier = 1;
+            pulsePhase = 0;
+            flameParticles = [];
+        }
+
+        function updateScore() {
+            player1ScoreEl.textContent = game.player1.score;
+            player2ScoreEl.textContent = game.player2.score;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawFlames();
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(game.player1.x, game.player1.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+            ctx.fillRect(game.player2.x, game.player2.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+            
+            const currentTime = Date.now();
+            const timeElapsed = (currentTime - gameStartTime) / 1000;
+            let ballSize = BALL_SIZE;
+            let ballRadius = BALL_SIZE;
+            
+            if (timeElapsed >= 30) {
+                const pulseFactor = 1 + Math.sin(pulsePhase) * 0.3;
+                ballSize = BALL_SIZE * pulseFactor;
+                ballRadius = ballSize;
+            }
+            
+            const ballGradient = ctx.createRadialGradient(
+                game.ball.x + BALL_SIZE/2, game.ball.y + BALL_SIZE/2, 0,
+                game.ball.x + BALL_SIZE/2, game.ball.y + BALL_SIZE/2, ballRadius
+            );
+            
+            if (timeElapsed >= 30) {
+                const intensity = Math.sin(pulsePhase) * 0.5 + 0.5;
+                ballGradient.addColorStop(0, `rgba(255, 255, 255, ${0.8 + intensity * 0.2})`);
+                ballGradient.addColorStop(0.2, `rgba(255, 255, 100, ${0.9 + intensity * 0.1})`);
+                ballGradient.addColorStop(0.5, `rgba(255, 150, 0, ${0.8 + intensity * 0.2})`);
+                ballGradient.addColorStop(1, `rgba(255, 50, 0, ${0.6 + intensity * 0.4})`);
+            } else {
+                ballGradient.addColorStop(0, '#fff');
+                ballGradient.addColorStop(0.3, '#ffff00');
+                ballGradient.addColorStop(0.7, '#ff6600');
+                ballGradient.addColorStop(1, '#ff0000');
+            }
+            
+            ctx.fillStyle = ballGradient;
+            const offsetX = (ballSize - BALL_SIZE) / 2;
+            const offsetY = (ballSize - BALL_SIZE) / 2;
+            ctx.fillRect(game.ball.x - offsetX, game.ball.y - offsetY, ballSize, ballSize);
+
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function resetGame() {
+            game.player1.score = 0;
+            game.player2.score = 0;
+            game.player1.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
+            game.player2.y = canvas.height / 2 - PADDLE_HEIGHT / 2;
+            gameStartTime = Date.now();
+            ballSpeedMultiplier = 1;
+            pulsePhase = 0;
+            resetBall();
+            updateScore();
+            gameRunning = true;
+            gameOverEl.style.display = 'none';
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                updatePaddles();
+                updateBall();
+            }
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        resetGame();
+        gameLoop();
+    </script>
+</body>
+</html>
