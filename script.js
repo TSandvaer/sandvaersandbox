@@ -126,9 +126,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const geometricShapes = document.querySelectorAll('.geometric-shape');
             const floatingPatterns = document.querySelector('.floating-patterns');
 
-            // Hero parallax
+            // Hero parallax - only apply transform, don't interfere with background patterns
             if (hero && scrolled < hero.offsetHeight) {
-                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+                // Apply transform only to hero-content, not the entire hero section
+                const heroContent = hero.querySelector('.hero-content');
+                if (heroContent) {
+                    heroContent.style.transform = `translateY(${scrolled * 0.2}px)`;
+                }
             }
 
             // Geometric shapes parallax with different speeds
