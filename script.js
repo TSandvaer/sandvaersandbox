@@ -27,29 +27,97 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
+    // Navigation functionality with active state management
+    function initNavigation() {
+        const navbar = document.querySelector('.navbar');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section[id]');
+
+        // Smooth scrolling for navigation links
+        navLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                const targetId = href.substring(1);
+                const target = document.getElementById(targetId);
+
+                if (target) {
+                    let offsetTop;
+                    if (targetId === 'home') {
+                        // For home, scroll to top
+                        offsetTop = 0;
+                    } else {
+                        // For other sections, account for navbar height
+                        offsetTop = target.offsetTop - 100;
+                    }
+
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Update active navigation link on scroll
+        function updateActiveNav() {
+            let current = 'home'; // Default to home
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            // If we're at the very top, always set home as active
+            if (scrollY < 100) {
+                current = 'home';
+            }
+            // If we're near the bottom of the page, don't change from current selection
+            else if (scrollY + windowHeight >= documentHeight - 50) {
+                // Keep the current active or set to the last section
+                const activeLink = document.querySelector('.nav-link.active');
+                if (activeLink) {
+                    current = activeLink.getAttribute('href').substring(1);
+                } else {
+                    current = 'projects'; // Default to projects if none active
+                }
+            } else {
+                // Find the section that should be active based on scroll position
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 150;
+                    const sectionBottom = section.offsetTop + section.offsetHeight;
+
+                    if (scrollY >= sectionTop && scrollY < sectionBottom) {
+                        current = section.getAttribute('id');
+                    }
                 });
             }
-        });
-    });
 
-    // Add scroll effect to navbar (matching sandvaer.dk)
-    window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+            // Update active class
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
         }
-    });
+
+        // Add scroll effect to navbar and update active nav
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Update active navigation
+            updateActiveNav();
+        });
+
+        // Set initial active state on page load
+        updateActiveNav();
+    }
+
+    // Initialize navigation
+    initNavigation();
 
     // Add hover effects and animations
     const projectCards_hover = document.querySelectorAll('.project-card');
