@@ -381,6 +381,17 @@ body::before {
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
 }
 
+.project-screenshot {
+    width: 60%;
+    height: 60%;
+    object-fit: cover;
+    position: relative;
+    z-index: 1;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
 .project-info {
     padding: 1.5rem;
 }
