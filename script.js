@@ -1,31 +1,54 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Category filtering functionality
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const projectCards = document.querySelectorAll('.project-card');
+    function initCategoryFiltering() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
 
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            // Remove active class from all buttons
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            // Add active class to clicked button
-            button.classList.add('active');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
 
-            const filterValue = button.getAttribute('data-category');
+                const filterValue = button.getAttribute('data-category');
 
-            projectCards.forEach(card => {
-                if (filterValue === 'all') {
-                    card.classList.remove('hidden');
-                } else {
+                console.log('Filtering by:', filterValue); // Debug log
+
+                projectCards.forEach((card, index) => {
                     const cardCategory = card.getAttribute('data-category');
-                    if (cardCategory === filterValue) {
+                    console.log(`Card ${index}: category="${cardCategory}", filter="${filterValue}"`); // Debug log
+
+                    // Clear any existing inline styles that might interfere
+                    card.style.opacity = '';
+                    card.style.transform = '';
+
+                    if (filterValue === 'all') {
                         card.classList.remove('hidden');
+                        // Add a slight delay for stagger effect
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0) scale(1)';
+                        }, index * 50);
                     } else {
-                        card.classList.add('hidden');
+                        if (cardCategory === filterValue) {
+                            card.classList.remove('hidden');
+                            // Add a slight delay for stagger effect
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0) scale(1)';
+                            }, index * 50);
+                        } else {
+                            card.classList.add('hidden');
+                        }
                     }
-                }
+                });
             });
         });
-    });
+    }
+
+    // Initialize category filtering
+    initCategoryFiltering();
 
     // Navigation functionality with active state management
     function initNavigation() {
@@ -146,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initially hide cards for animation
+    const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach((card, index) => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';

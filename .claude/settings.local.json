@@ -4,7 +4,8 @@
       "WebFetch(domain:www.sandvaer.dk)",
       "Bash(git init:*)",
       "WebFetch(domain:sandvaer.dk)",
-      "Read(//c/trunk/sandvaer/**)"
+      "Read(//c/trunk/sandvaer/**)",
+      "Bash(start index.html)"
     ],
     "deny": [],
     "ask": []
