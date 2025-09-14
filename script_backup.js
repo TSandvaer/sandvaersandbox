@@ -105,58 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Enhanced parallax effects for multiple elements
-    function initParallaxEffects() {
-        const throttle = (func, limit) => {
-            let inThrottle;
-            return function() {
-                const args = arguments;
-                const context = this;
-                if (!inThrottle) {
-                    func.apply(context, args);
-                    inThrottle = true;
-                    setTimeout(() => inThrottle = false, limit);
-                }
-            }
-        };
-
-        window.addEventListener('scroll', throttle(function() {
-            const scrolled = window.pageYOffset;
-            const hero = document.querySelector('.hero');
-            const geometricShapes = document.querySelectorAll('.geometric-shape');
-            const floatingPatterns = document.querySelector('.floating-patterns');
-
-            // Hero parallax
-            if (hero && scrolled < hero.offsetHeight) {
-                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
-            }
-
-            // Geometric shapes parallax with different speeds
-            geometricShapes.forEach((shape, index) => {
-                const speed = 0.1 + (index * 0.05); // Different speeds for each shape
-                const yPos = -(scrolled * speed);
-                const rotation = scrolled * (0.02 + index * 0.01);
-
-                // Apply parallax transform while preserving base transform
-                shape.style.transform += ` translateY(${yPos}px) rotate(${rotation}deg)`;
-            });
-
-            // Background patterns subtle movement
-            if (floatingPatterns) {
-                const moveX = Math.sin(scrolled * 0.001) * 10;
-                const moveY = scrolled * 0.05;
-                floatingPatterns.style.transform = `translate(${moveX}px, ${-moveY}px)`;
-            }
-
-            // Background layer parallax
-            document.body.style.backgroundPosition = `${scrolled * 0.1}px ${scrolled * 0.05}px`;
-
-        }, 16));
-    }
-
-    // Initialize parallax effects
-    initParallaxEffects();
-
     // Mobile menu toggle (if needed in future)
     const mobileMenuToggle = () => {
         // Future implementation for mobile menu
